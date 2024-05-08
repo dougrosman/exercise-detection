@@ -7,6 +7,11 @@ let currentPose;
 let currentPoseProbability;
 let exerciseIndex = 0;
 let running = false;
+let squatCount = 0;
+let jumpingjackCount = 0;
+let obliquebendCount = 0;
+let scarecrowCount = 0;
+
 
 // paste the url of the model you trained in teachablemachine here
 let URL = `models/model${exerciseIndex}/`;
@@ -17,48 +22,48 @@ let metadataURL = URL + "metadata.json";
 const exercises = [
   "squat",
   "jumpingjack",
-  "obliquebend",
+  "obliquebend",  
   "scarecrow",
-  "twistjump",
-  "backbend",
-  "kneetoelbow",
-  "sidelunge",
-  "crisscross"
+  // "twistjump", // remove this
+  // "backbend", // remove this 
+  // "kneetoelbow", // remove this
+  // "sidelunge", // remove this
+  // "crisscross" // remove this
 ];
 let images = [];
 let sounds = [];
 
-const cam_w = 640;
-const cam_h = 480;
+const cam_w = 1280;
+const cam_h = 720;
 const imgDisplayDuration = 5000; // time in milliseconds to show each image
 
 function preload() {
 
-  images.push(loadImage('squat.jpeg'));
-  images.push(loadImage('jumpingjack.jpeg'));
-  images.push(loadImage('obliquebend.jpeg'));
-  images.push(loadImage('scarecrow.jpeg'));
-  images.push(loadImage('twistjump.jpeg'));
-  images.push(loadImage('backbend.jpeg'));
-  images.push(loadImage('kneetoelbow.jpeg'));
-  images.push(loadImage('sidelunge.jpeg'));
-  images.push(loadImage('crisscross.jpeg'));
+  images.push(loadImage('squatc.jpg'));
+  images.push(loadImage('jumpingjackc.jpg'));
+  images.push(loadImage('obliquebendc.jpg'));
+  images.push(loadImage('scarecrowc.jpg'));
+  // images.push(loadImage('twistjump.jpeg'));
+  //images.push(loadImage('backbend.jpeg'));
+  // images.push(loadImage('kneetoelbow.jpeg'));
+  // images.push(loadImage('sidelunge.jpeg'));
+  // images.push(loadImage('crisscross.jpeg'));
   
   sounds.push(loadSound('reward.mp3'));
   sounds.push(loadSound('reward2.mp3'));
   sounds.push(loadSound('reward3.mp3'));
   sounds.push(loadSound('reward4.mp3'));
-  sounds.push(loadSound('reward5.mp3'));
-  sounds.push(loadSound('reward6.mp3'));
-  sounds.push(loadSound('reward7.mp3'));
-  sounds.push(loadSound('reward8.mp3'));
-  sounds.push(loadSound('reward9.mp3'));
+  // sounds.push(loadSound('reward5.mp3'));
+  // sounds.push(loadSound('reward6.mp3'));
+  // sounds.push(loadSound('reward7.mp3'));
+  // sounds.push(loadSound('reward8.mp3'));
+  // sounds.push(loadSound('reward9.mp3'));
 }
 
 async function setup() {
   // model = await tmPose.load(modelURL, metadataURL);
   // load all the models into an array
-  for(let i = 0; i < 9; i++) {
+  for(let i = 0; i < 4; i++) {
     let url = `models/model${i}/`;
     let modelurl = url + "model.json";
     let metadataurl = url + "metadata.json";
@@ -84,7 +89,8 @@ async function setup() {
   createCanvas(cam_w, cam_h);
 
   btn = createButton('Start Exercise');
-  btn.position(10, cam_h + 10);
+  btn.addClass("start-button");
+  // btn.position(10, cam_h + 10);
   btn.mousePressed(startExercise);
 
   document.getElementById("status").innerHTML = "Ready";
@@ -93,18 +99,21 @@ async function setup() {
 }
 
 function startExercise() {
-  running = true;
-  currentImg = images[exerciseIndex];
-  showImgUntil = millis() + imgDisplayDuration;
-  imgShowing = true;
-  poseConfirmed = false;
+  setTimeout(function() {
+    running = true;
+    currentImg = images[exerciseIndex];
+    showImgUntil = millis() + imgDisplayDuration;
+    imgShowing = true;
+    poseConfirmed = false;
+    btn.hide();
+  }, 3000)
 }
 
 
 function draw() {
   background(0);
 
-  if (imgShowing && millis() < showImgUntil) {
+  if (imgShowing && millis() < showImgUntil && running == true) {
     image(currentImg, 0, 0, cam_w, cam_h);
   } else if (imgShowing && millis() >= showImgUntil) {
     imgShowing = false;
@@ -112,7 +121,7 @@ function draw() {
   }
 
 
-  if (pose && !imgShowing && !poseConfirmed) {
+  if (pose && !imgShowing && !poseConfirmed && running == true) {
     // draw keypoints
     pose.keypoints.forEach((keypoint) => {
       ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
@@ -162,8 +171,14 @@ function draw() {
 
     fill(255)
     strokeWeight(1)
-    text(currentPose, width/2, 20);
-    text(currentPoseProbability, width/2, 40);
+
+    // text(currentPose, width/2, 20);
+    // text(currentPoseProbability, width/2, 40);
+
+    text(squatCount, 0, 0);
+    text(jumpingjackCount, 1, 1);
+    text(obliquebendCount, 2, 2);
+    text(scarecrowCount, 3, 3);
 
     // console.log(pose)
 
@@ -171,12 +186,30 @@ function draw() {
       doPredictions = false;
       poseConfirmed = true;
       sounds[exerciseIndex].play();
+
+      switch(exerciseIndex) {
+        case 0:
+          squatCount++
+          break;
+        case 1:
+         jumpingjackCount++
+         break;
+        case 2:
+         obliquebendCount++
+         break;
+        case 3:
+          scarecrowCount++
+          break;
+    
+      }
       
 
       setTimeout(() => {
         currentImg = images[exerciseIndex]; // Toggle between images
         showImgUntil = millis() + imgDisplayDuration;
-        imgShowing = true;
+        if(exerciseIndex > 0) {
+          imgShowing = true;
+        }
         poseConfirmed = false;
         doPredictions = true;
       }, 3000); // Wait for 1 second before showing the next image
@@ -192,6 +225,11 @@ debug.addEventListener("click", function(){
       if(exerciseIndex < exercises.length-1) {
         exerciseIndex++;
         model = models[exerciseIndex]
+      } else {
+        exerciseIndex = 0;
+        model = models[0];
+        running = false;
+        btn.show()// show the button again
       }
       // URL = `models/model${exerciseIndex}/`;
       // modelURL = URL + "model.json";
@@ -201,7 +239,10 @@ debug.addEventListener("click", function(){
       setTimeout(() => {
         currentImg = images[exerciseIndex]; // Toggle between images
         showImgUntil = millis() + imgDisplayDuration;
-        imgShowing = true;
+        // imgShowing = false;
+        if(exerciseIndex > 0) {
+          imgShowing = true;
+        }
         poseConfirmed = false;
         doPredictions = true;
       }, 1000); // Wait for 1 second before showing the next image
@@ -214,10 +255,15 @@ function checkPose() {
   if(!poseConfirmed && currentPose == exercises[exerciseIndex]) {
     console.log(`You did a ${currentPose}, good job.`)
     
-    if(exerciseIndex < exercises.length) {
+    if(exerciseIndex < exercises.length - 1) {
       exerciseIndex++;
       model = models[exerciseIndex]
       
+    }else{
+      exerciseIndex = 0;
+      model = models[0];
+      running = false;
+      btn.show()// show the button again 
     }
     return true;
   }

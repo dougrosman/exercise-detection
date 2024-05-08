@@ -9,8 +9,27 @@ html, body {
     z-index: 1;
     left: 0;
     top: 0;
-    /* width: 100% !important;
+    width: 100% !important;
     height: 100% !important;
-    object-fit: contain; */
+    object-fit: cover;
   }
   
+
+  .start-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+
+    background-color: teal;
+    border: 2px solid white;
+    padding: 40px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 50px;
+  }
+
+
+  .start-button:hover {
+    cursor: pointer;
+  }
