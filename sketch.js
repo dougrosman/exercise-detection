@@ -71,6 +71,7 @@ async function setup() {
     models.push(tempmodel);
   }
   model = models[exerciseIndex]
+  imageMode(CENTER)
 
   maxPredictions = model.getTotalClasses();
 
@@ -114,8 +115,8 @@ function draw() {
   background(0);
 
   if (imgShowing && millis() < showImgUntil && running == true) {
-    image(currentImg, 0, 0, cam_w, cam_h);
-  } else if (imgShowing && millis() >= showImgUntil) {
+    image(currentImg, width/2, height/2, 560, 720);
+  } else if (imgShowing && millis() >= showImgUntil) { 
     imgShowing = false;
     // Switch to pose checking mode
   }
@@ -252,7 +253,8 @@ debug.addEventListener("click", function(){
 function checkPose() {
   // Implement logic to check if the current pose matches the required pose
   // This function should return true if the pose matches
-  if(!poseConfirmed && currentPose == exercises[exerciseIndex]) {
+  // console.log(currentPoseProbability)
+  if(!poseConfirmed && currentPose == exercises[exerciseIndex] && currentPoseProbability > 0.98) {
     console.log(`You did a ${currentPose}, good job.`)
     
     if(exerciseIndex < exercises.length - 1) {
@@ -288,6 +290,7 @@ async function predict() {
   const prediction = await model.predict(posenetOutput);
   sortedPrediction = prediction.sort((a, b) => -a.probability + b.probability);
   drawVideo();
+  console.log(sortedPrediction);
   // console.log("hello")
   console.log(sortedPrediction[0].className)
   currentPose = sortedPrediction[0].className;
