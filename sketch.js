@@ -17,7 +17,11 @@ let scarecrowCount = 0;
 let URL = `models/model${exerciseIndex}/`;
 let modelURL = URL + "model.json";
 let metadataURL = URL + "metadata.json";
-// let doPredictions = true;
+let doPredictions = false;
+
+setTimeout(()=> {
+  doPredictions = true;
+}, 10000)
 
 const exercises = [
   "squat",
@@ -89,10 +93,12 @@ async function setup() {
   ctx = canvas.getContext("2d");
   createCanvas(cam_w, cam_h);
 
-  btn = createButton('Start Exercise');
-  btn.addClass("start-button");
-  // btn.position(10, cam_h + 10);
-  btn.mousePressed(startExercise);
+  // btn = createButton('Start Exercise');
+  // btn.addClass("start-button");
+  // // btn.position(10, cam_h + 10);
+  // btn.mousePressed(startExercise);
+
+  startExercise()
 
   document.getElementById("status").innerHTML = "Ready";
   currentPose = "loading..."
@@ -100,14 +106,14 @@ async function setup() {
 }
 
 function startExercise() {
-  setTimeout(function() {
+  //setTimeout(function() {
     running = true;
     currentImg = images[exerciseIndex];
     showImgUntil = millis() + imgDisplayDuration;
     imgShowing = true;
     poseConfirmed = false;
-    btn.hide();
-  }, 3000)
+    //btn.hide();
+  //}, 3000)
 }
 
 
@@ -212,8 +218,12 @@ function draw() {
           imgShowing = true;
         }
         poseConfirmed = false;
+        // doPredictions = true;
+      }, 3000); // Wait for 3 seconds before showing the next image
+
+      setTimeout(() => {
         doPredictions = true;
-      }, 3000); // Wait for 1 second before showing the next image
+      }, 6000);
     }
   }
 }
@@ -229,8 +239,8 @@ debug.addEventListener("click", function(){
       } else {
         exerciseIndex = 0;
         model = models[0];
-        running = false;
-        btn.show()// show the button again
+        //running = false;
+        // btn.show()// show the button again
       }
       // URL = `models/model${exerciseIndex}/`;
       // modelURL = URL + "model.json";
@@ -254,7 +264,7 @@ function checkPose() {
   // Implement logic to check if the current pose matches the required pose
   // This function should return true if the pose matches
   // console.log(currentPoseProbability)
-  if(!poseConfirmed && currentPose == exercises[exerciseIndex] && currentPoseProbability > 0.98) {
+  if(!poseConfirmed && currentPose == exercises[exerciseIndex] && currentPoseProbability > 0.98 && doPredictions) {
     console.log(`You did a ${currentPose}, good job.`)
     
     if(exerciseIndex < exercises.length - 1) {
@@ -264,14 +274,14 @@ function checkPose() {
     }else{
       exerciseIndex = 0;
       model = models[0];
-      running = false;
-      btn.show()// show the button again 
+      //running = false;
+      //btn.show()// show the button again 
     }
     return true;
   }
   
 
-  return false; // Placeholder: should be replaced with actual checking logic
+  return false;
 }
 
 async function loop1(timestamp) {
@@ -290,9 +300,9 @@ async function predict() {
   const prediction = await model.predict(posenetOutput);
   sortedPrediction = prediction.sort((a, b) => -a.probability + b.probability);
   drawVideo();
-  console.log(sortedPrediction);
+  //console.log(sortedPrediction);
   // console.log("hello")
-  console.log(sortedPrediction[0].className)
+  //console.log(sortedPrediction[0].className)
   currentPose = sortedPrediction[0].className;
   currentPoseProbability = sortedPrediction[0].probability;
 
